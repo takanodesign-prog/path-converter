@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medix 路徑轉換器</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .section-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-size: 12px;
+      color: #666;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      color: #222;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: #888;
+    }
+
+    .btn-convert {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-convert:hover { background: #444; }
+    .btn-convert:active { transform: scale(0.98); }
+
+    .result-box {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 14px;
+      display: none;
+    }
+
+    .result-label {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 4px;
+      margin-top: 10px;
+    }
+
+    .result-label:first-child { margin-top: 0; }
+
+    .result-path {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #222;
+      word-break: break-all;
+      line-height: 1.6;
+    }
+
+    .warning-msg {
+      font-size: 12px;
+      color: #e08000;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .copy-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .copy-btn {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #333;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+
+    .copy-btn:hover { background: #f0f0f0; border-color: #aaa; }
+    .copy-btn:active { transform: scale(0.97); }
+    .copy-btn.copied { color: #2a8a4a; border-color: #2a8a4a; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Medix 路徑轉換器</h1>
+
+    <!-- WIN → MAC -->
+    <div class="section-card">
+      <p class="section-title">🪟 Win → Mac</p>
+
+      <div class="field-row">
+        <div>
+          <label for="pc_id">PC ID</label>
+          <select id="pc_id">
+            <option>01</option>
+            <option>02</option>
+            <option>03</option>
+            <option>04</option>
+          </select>
+        </div>
+        <div>
+          <label for="email_id">使用者</label>
+          <select id="email_id">
+            <option>mtakano</option>
+            <option>albada</option>
+            <option>zeta</option>
+            <option>sandi</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="macPath">Windows 路徑</label>
+      <input type="text" id="macPath" placeholder="貼上 Windows 路徑（含「海外事業推進室」）" />
+      <button class="btn-convert" onclick="convertWinToMac()">轉換路徑</button>
+
+      <div class="result-box" id="result_1_box">
+        <div id="warn_1"></div>
+        <div class="result-label">Mac 路徑</div>
+        <p class="result-path" id="path_1"></p>
+        <div class="copy-row">
+          <button class="copy-btn" id="copy2" onclick="copyPath('path_1','copy2')">複製</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAC → WIN -->
+    <div class="section-card">
+      <p class="section-title">🍎 Mac → Win</p>
+
+      <label for="macPath_2">Mac 路徑</label>
+      <input type="text" id="macPath_2" placeholder="貼上 Mac 路徑（含「海外事業推進室」）" />
+      <button class="btn-convert" onclick="convertMacToWin()">轉換路徑</button>
+
+      <div class="result-box" id="result_2_box">
+        <div id="warn_2"></div>
+        <div class="result-label">Windows 路徑（日文）</div>
+        <p class="result-path" id="path_2"></p>
+        <div class="result-label">Windows 路徑（中文）</div>
+        <p class="result-path" id="path_3"></p>
+        <div class="copy-row">
+          <button class="copy-btn" id="copy" onclick="copyPath('path_2','copy')">日文複製</button>
+          <button class="copy-btn" id="copy_TS" onclick="copyPath('path_3','copy_TS')">中文複製</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function convertWinToMac() {
+      const macPath = document.getElementById('macPath').value.trim();
+      const pc_id = document.getElementById('pc_id').value;
+      const email_id = document.getElementById('email_id').value;
+      const target = '海外事業推進室';
+      const box = document.getElementById('result_1_box');
+      const warnEl = document.getElementById('warn_1');
+
+      if (!macPath) return;
+
+      warnEl.innerHTML = !macPath.includes(target)
+        ? '<div class="warning-msg">⚠️ 警告：路徑中找不到「海外事業推進室」，結果可能有誤。</div>'
+        : '';
+
+      const rest = macPath.includes(target) ? macPath.split(target)[1] : macPath;
+      const converted = rest.replace(/\\/g, '/');
+
+      document.getElementById('path_1').textContent =
+        `/Users/medix${pc_id}/Library/CloudStorage/GoogleDrive-${email_id}@medix-inc.tw/共用雲端硬碟/海外事業推進室${converted}`;
+
+      box.style.display = 'block';
+      resetBtn('copy2');
+    }
+
+    function convertMacToWin() {
+      const macPath_2 = document.getElementById('macPath_2').value.trim();
+      const target_2 = '海外事業推進室';
+      const box = document.getElementById('result_2_box');
+      const warnEl = document.getElementById('warn_2');
+
+      if (!macPath_2) return;
+
+      warnEl.innerHTML = !macPath_2.includes(target_2)
+        ? '<div class="warning-msg">⚠️ 警告：路徑中找不到「海外事業推進室」，結果可能有誤。</div>'
+        : '';
+
+      const rest = macPath_2.includes(target_2) ? macPath_2.split(target_2)[1] : macPath_2;
+      const converted = rest.replace(/\//g, '\\');
+
+      document.getElementById('path_2').textContent = `G:\\共有ドライブ\\海外事業推進室${converted}`;
+      document.getElementById('path_3').textContent = `G:\\共用雲端硬碟\\海外事業推進室${converted}`;
+
+      box.style.display = 'block';
+      resetBtn('copy');
+      resetBtn('copy_TS');
+    }
+
+    function copyPath(pathId, btnId) {
+      const text = document.getElementById(pathId).textContent;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(btnId);
+        const orig = btn.textContent;
+        btn.textContent = '✓ 已複製';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function resetBtn(id) {
+      const btn = document.getElementById(id);
+      btn.classList.remove('copied');
+    }
+  </script>
+</body>
+</html>
